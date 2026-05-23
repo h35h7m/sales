@@ -1,0 +1,42 @@
+﻿@model RegisterViewModel
+
+<div class="register-container">
+    <h2 class="text-center text-primary mb-4">Create New Account</h2>
+
+    <form asp-action="Register" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label asp-for="Username" class="text-primary fw-bold"></label>
+            <input asp-for="Username" class="form-control" style="background-color: #f0f8ff;" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="text-primary fw-bold"></label>
+            <input asp-for="Email" class="form-control" style="background-color: #f0f8ff;" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="text-primary fw-bold"></label>
+            <input asp-for="Password" type="password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="ConfirmPassword" class="text-primary fw-bold">Confirm Password</label>
+            <input asp-for="ConfirmPassword" type="password" class="form-control" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+
+       
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <button type="submit" class="btn btn-primary w-100 p-2" style="border-radius: 10px;">Register</button>
+
+        <div class="text-center mt-3">
+            <a asp-action="Login" class="text-decoration-none">Already have an account? Login</a>
+        </div>
+    </form>
+</div>

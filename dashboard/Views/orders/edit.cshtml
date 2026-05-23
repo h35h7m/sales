@@ -1,0 +1,166 @@
+﻿@model Order
+
+<div class="container-fluid">
+    <h2 class="text-center text-primary mb-4">Edit Order #@Model.Id</h2>
+
+    <form asp-action="Edit" method="post">
+        <div class="card shadow-sm p-4 mx-auto" style="border-radius: 15px;">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label class="text-primary fw-bold">Customer Name</label>
+                    <input asp-for="CustomerName" class="form-control" style="background-color: #f0f8ff;" />
+                </div>
+                <div class="col-md-6">
+                    <label class="text-primary fw-bold">Order Date</label>
+                    <input asp-for="OrderDate" type="date" class="form-control" value="@Model.OrderDate.ToString("yyyy-MM-dd")" />
+                </div>
+            </div>
+
+            <hr class="text-primary" />
+
+            <div class="row g-3 align-items-end mb-4">
+                <div class="col-md-4">
+                    <label class="text-primary fw-bold">Product</label>
+                    <select id="productSelect" class="form-select" style="background-color: #f0f8ff;">
+                        <option value="">-- Select --</option>
+                        @foreach (var p in ViewBag.ProductsList)
+                        {
+                            <option value="@p.Id" data-price="@p.Price">@p.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="text-primary fw-bold">Price</label>
+                    <input type="number" id="unitPrice" class="form-control" step="0.01" />
+                </div>
+                <div class="col-md-3">
+                    <label class="text-primary fw-bold">Quantity</label>
+                    <input type="number" id="quantity" class="form-control" value="1" min="1" />
+                </div>
+                <div class="col-md-2">
+                    <button type="button" id="btnAddProduct" class="btn btn-success w-100">Add</button>
+                </div>
+            </div>
+
+            <table class="table table-hover text-center align-middle" id="detailsTable">
+                <thead class="table-primary text-white">
+                    <tr>
+                        <th>Product</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.OrderDetails != null)
+                    {
+                        for (int i = 0; i < Model.OrderDetails.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="OrderDetails[@i].ProductId" value="@Model.OrderDetails[i].ProductId" />
+                                    @Model.OrderDetails[i].Product.Name
+                                </td>
+                                <td>
+                                    <input type="hidden" name="OrderDetails[@i].UnitPrice" value="@Model.OrderDetails[i].UnitPrice" />
+                                    @Model.OrderDetails[i].UnitPrice
+                                </td>
+                                <td>
+                                    <input type="hidden" name="OrderDetails[@i].Quantity" value="@Model.OrderDetails[i].Quantity" />
+                                    @Model.OrderDetails[i].Quantity
+                                </td>
+                                <td class="row-total">@(Model.OrderDetails[i].UnitPrice * Model.OrderDetails[i].Quantity)</td>
+                                <td>
+                                    <div class="d-flex flex-column align-items-center gap-1">
+                                        <a href="javascript:void(0)" class="text-dark text-decoration-none edit-item" style="font-size: 0.8rem;"><i class="bi bi-pencil-square"></i> Edit</a>
+                                        <a href="javascript:void(0)" class="text-danger text-decoration-none remove-item" style="font-size: 0.8rem;"><i class="bi bi-trash"></i> Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+            <div class="row mt-3 border-top pt-3">
+                <div class="col-md-12 d-flex justify-content-between align-items-center">
+                    <h4 class="text-primary m-0">Total: <span id="grandTotal">@Model.OrderDetails?.Sum(x => x.UnitPrice * x.Quantity).ToString("F2")</span></h4>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-5">Update Order</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-5">Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        let index = $('#detailsTable tbody tr').length;
+
+        $('#productSelect').change(function() {
+            let price = $(this).find(':selected').data('price');
+            $('#unitPrice').val(price || "");
+        });
+
+        $('#btnAddProduct').click(function() {
+            let productId = $('#productSelect').val();
+            let productName = $('#productSelect option:selected').text();
+            let price = parseFloat($('#unitPrice').val());
+            let qty = parseInt($('#quantity').val());
+
+            if (!productId || isNaN(price) || qty <= 0) return alert("Check inputs");
+
+            let total = price * qty;
+            let row = `<tr>
+                <td>
+                    <input type="hidden" name="OrderDetails[${index}].ProductId" value="${productId}" />
+                    ${productName}
+                </td>
+                <td>
+                    <input type="hidden" name="OrderDetails[${index}].UnitPrice" value="${price}" />
+                    ${price.toFixed(2)}
+                </td>
+                <td>
+                    <input type="hidden" name="OrderDetails[${index}].Quantity" value="${qty}" />
+                    ${qty}
+                </td>
+                <td class="row-total">${total.toFixed(2)}</td>
+                <td>
+                    <div class="d-flex flex-column align-items-center gap-1">
+                        <a href="javascript:void(0)" class="text-dark text-decoration-none edit-item" style="font-size: 0.8rem;"><i class="bi bi-pencil-square"></i> Edit</a>
+                        <a href="javascript:void(0)" class="text-danger text-decoration-none remove-item" style="font-size: 0.8rem;"><i class="bi bi-trash"></i> Delete</a>
+                    </div>
+                </td>
+            </tr>`;
+
+            $('#detailsTable tbody').append(row);
+            index++;
+            updateGrandTotal();
+        });
+
+        $(document).on('click', '.remove-item', function() {
+            $(this).closest('tr').remove();
+            updateGrandTotal();
+        });
+
+        $(document).on('click', '.edit-item', function() {
+            let row = $(this).closest('tr');
+            $('#productSelect').val(row.find('input[name*="ProductId"]').val()).change();
+            $('#unitPrice').val(row.find('input[name*="UnitPrice"]').val());
+            $('#quantity').val(row.find('input[name*="Quantity"]').val());
+            row.remove();
+            updateGrandTotal();
+        });
+
+        function updateGrandTotal() {
+            let sum = 0;
+            $('.row-total').each(function() { sum += parseFloat($(this).text()); });
+            $('#grandTotal').text(sum.toFixed(2));
+        }
+    </script>
+}

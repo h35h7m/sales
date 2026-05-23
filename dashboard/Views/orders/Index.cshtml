@@ -1,0 +1,80 @@
+﻿@model OrderSearchViewModel
+
+<h2 class="text-center text-primary mb-4">Orders Management</h2>
+
+
+<form method="get" asp-action="Index" class="row g-3 mb-4 align-items-end p-3 bg-white shadow-sm rounded">
+    <div class="col-md-4">
+        <label asp-for="CustomerName" class="text-primary fw-bold">Customer Name</label>
+        <input asp-for="CustomerName" class="form-control" style="background-color: #f0f8ff;"/>
+    </div>
+
+    <div class="col-md-3">
+        <label asp-for="DateFrom" class="text-primary fw-bold">Date From</label>
+        <input asp-for="DateFrom" type="date" class="form-control" />
+    </div>
+
+    <div class="col-md-3">
+        <label asp-for="DateTo" class="text-primary fw-bold">Date To</label>
+        <input asp-for="DateTo" type="date" class="form-control" />
+    </div>
+
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+        <a asp-action="Create" class="btn btn-primary w-100">Add New Order</a>
+    </div>
+</form>
+
+
+<div class="bg-white shadow-sm rounded">
+    <table class="table table-hover text-center align-middle">
+        <thead class="table-primary text-white">
+            <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Orders)
+            {
+                <tr>
+                    <td>#@item.Id</td>
+                    <td>@item.CustomerName</td>
+                    <td>@item.OrderDate.ToShortDateString()</td>
+                    <td class="fw-bold text-success">@item.TotalAmount.ToString("N2")</td>
+                    <td>
+                        <div class="d-flex flex-column align-items-center gap-1">
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="text-dark text-decoration-none" style="font-size: 0.8rem;">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <a href="javascript:void(0)" onclick="confirmDeleteOrder(@item.Id)" class="text-danger text-decoration-none" style="font-size: 0.8rem;">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+    <script>
+        function confirmDeleteOrder(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Orders/Delete/' + id;
+                }
+            })
+        }
+    </script>

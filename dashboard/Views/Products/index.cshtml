@@ -1,0 +1,79 @@
+﻿@model ProductSearchViewModel
+
+<h2 class="text-center text-primary mb-4">Product</h2>
+
+
+<form method="get" asp-action="Index" class="row g-3 mb-4 align-items-end">
+    <div class="col-md-4">
+        <label class="text-primary fw-bold">Name</label>
+        <input type="text" name="name" value="@Model.Name" class="form-control" style="background-color: #f0f8ff;" />
+    </div>
+    <div class="col-md-3">
+        <label class="text-primary fw-bold">Date from :</label>
+        <input type="date" name="dateFrom" value="@Model.DateFrom?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-3">
+        <label class="text-primary fw-bold">Date to :</label>
+        <input type="date" name="dateTo" value="@Model.DateTo?.ToString("yyyy-MM-dd")" class="form-control" />
+    </div>
+    <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary w-100">Search</button>
+        <a asp-action="Create" class="btn btn-primary w-100">Add New Product</a>
+    </div>
+</form>
+
+
+<table class="table table-bordered text-center align-middle bg-white shadow-sm">
+    <thead class="table-primary text-white">
+        <tr>
+            <th>#</th>
+            <th>Image Product</th>
+            <th>(Product)s</th>
+            <th>Price</th>
+            <th>Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Products)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>
+                    <img src="@(string.IsNullOrEmpty(item.ImagePath) ? "/images/no-image.png" : item.ImagePath)"
+                         style="width: 80px; height: 80px; object-fit: cover;" />
+                </td>
+                <td>@item.Name</td>
+                <td>@item.Price</td>
+                <td>@item.CreatedAt.ToShortDateString()</td>
+                <td>
+                    <div class="d-flex flex-column gap-2 align-items-center">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="text-dark text-decoration-none"><i class="bi bi-pencil-square"></i> Edit</a>
+                        <a href="javascript:void(0)"
+                           onclick="confirmDelete(@item.Id, '@item.Name')"
+                           class="text-danger text-decoration-none">
+                           <i class="bi bi-trash"></i> Delete</a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function confirmDelete(id, productName) {
+        Swal.fire({
+            title: 'Are you sure?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33', 
+            cancelButtonColor: '#3085d6', 
+            confirmButtonText: 'Delete ',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/Products/Delete/' + id;
+            }
+        })
+    }
+</script>
